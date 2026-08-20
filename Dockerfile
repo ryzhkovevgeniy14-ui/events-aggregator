@@ -6,6 +6,8 @@ RUN addgroup --system --gid 1000 appuser && \
 WORKDIR /app
 
 COPY --chown=appuser:appuser pyproject.toml uv.lock README.md ./
+COPY --chown=appuser:appuser alembic.ini ./
+COPY --chown=appuser:appuser alembic ./alembic
 COPY --chown=appuser:appuser src ./src
 
 RUN pip install --no-cache-dir uv && \
