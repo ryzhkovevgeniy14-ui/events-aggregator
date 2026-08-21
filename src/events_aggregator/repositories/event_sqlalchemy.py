@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from events_aggregator.models.event import Event
 
@@ -36,7 +37,11 @@ class SqlAlchemyEventRepository:
         )
         total = total_result.scalar_one()
 
-        query = query.order_by(Event.event_time)
+        query = (
+            query
+            .options(selectinload(Event.place))
+            .order_by(Event.event_time)
+        )
 
         offset = (page - 1) * page_size
 
