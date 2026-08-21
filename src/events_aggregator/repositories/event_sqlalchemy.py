@@ -16,7 +16,9 @@ class SqlAlchemyEventRepository:
 
     async def get(self, event_id: UUID) -> Event | None:
         result = await self.session.execute(
-            select(Event).where(Event.id == event_id),
+            select(Event)
+            .options(selectinload(Event.place))
+            .where(Event.id == event_id),
         )
 
         return result.scalar_one_or_none()
