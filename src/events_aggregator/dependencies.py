@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from events_aggregator.clients.events_provider import EventsProviderClient
 from events_aggregator.config import settings
 from events_aggregator.db.depends import get_async_db
+from events_aggregator.repositories.event import EventRepository
 from events_aggregator.repositories.event_sqlalchemy import (
     SqlAlchemyEventRepository,
 )
@@ -16,6 +17,7 @@ from events_aggregator.repositories.place_sqlalchemy import (
 from events_aggregator.repositories.sync_state_sqlalchemy import (
     SqlAlchemySyncStateRepository,
 )
+from events_aggregator.services.seats import SeatsService
 from events_aggregator.services.sync import SyncService
 
 
@@ -54,4 +56,16 @@ async def get_sync_service(
         events=events,
         places=places,
         sync_state=sync_state,
+    )
+
+
+async def get_seats_service(
+    request: Request,
+    events: EventRepository = Depends(get_event_repository),  # noqa: B008
+    client: EventsProviderClient = Depends(get_events_provider_client),  # noqa: B008
+) -> SeatsService:
+    return SeatsService(
+        events=events,
+        client=client,
+        cache=request.app.state.seats_cache,
     )
