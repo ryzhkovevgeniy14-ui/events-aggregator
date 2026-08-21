@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from datetime import date, datetime, time
+from uuid import UUID
 
 import httpx
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +15,11 @@ from events_aggregator.dependencies import (
     get_sync_service,
 )
 from events_aggregator.repositories.event import EventRepository
-from events_aggregator.schemas.event import EventListItem, EventsListResponse
+from events_aggregator.schemas.event import (
+    EventListItem,
+    EventResponse,
+    EventsListResponse,
+)
 from events_aggregator.services.sync import SyncService
 
 
@@ -108,3 +113,22 @@ async def list_events(
         previous=previous_url,
         results=results,
     )
+
+
+@app.get(
+    "/api/events/{event_id}",
+    response_model=EventResponse,
+)
+async def get_event(
+    event_id: UUID,
+    events: EventRepository = Depends(get_event_repository),  # noqa: B008
+) -> EventResponse:
+    event = await events.get(event_id)
+
+    if event is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Event not found",
+        )
+
+    return EventResponse.model_validate(event)
