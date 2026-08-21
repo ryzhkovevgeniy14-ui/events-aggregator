@@ -6,14 +6,10 @@ from uuid import UUID
 from events_aggregator.clients.events_provider import EventsProviderClient
 from events_aggregator.repositories.event import EventRepository
 from events_aggregator.schemas.seats import SeatsResponse
-
-
-class EventNotFoundError(Exception):
-    pass
-
-
-class EventNotPublishedError(Exception):
-    pass
+from events_aggregator.services.exceptions import (
+    EventNotFoundError,
+    EventNotPublishedError,
+)
 
 
 class SeatsService:

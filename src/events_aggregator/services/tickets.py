@@ -8,30 +8,14 @@ from events_aggregator.models.ticket import Ticket
 from events_aggregator.repositories.event import EventRepository
 from events_aggregator.repositories.ticket import TicketRepository
 from events_aggregator.schemas.ticket import RegisterResponse, UnregisterResponse
-
-
-class EventNotFoundError(ValueError):
-    pass
-
-
-class EventNotPublishedError(ValueError):
-    pass
-
-
-class RegistrationDeadlinePassedError(ValueError):
-    pass
-
-
-class SeatNotAvailableError(ValueError):
-    pass
-
-
-class TicketNotFoundError(ValueError):
-    pass
-
-
-class EventAlreadyPassedError(ValueError):
-    pass
+from events_aggregator.services.exceptions import (
+    EventAlreadyPassedError,
+    EventNotFoundError,
+    EventNotPublishedError,
+    RegistrationDeadlinePassedError,
+    SeatNotAvailableError,
+    TicketNotFoundError,
+)
 
 
 class TicketService:
