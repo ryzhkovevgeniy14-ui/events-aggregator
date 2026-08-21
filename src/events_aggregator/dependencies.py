@@ -17,8 +17,13 @@ from events_aggregator.repositories.place_sqlalchemy import (
 from events_aggregator.repositories.sync_state_sqlalchemy import (
     SqlAlchemySyncStateRepository,
 )
+from events_aggregator.repositories.ticket import TicketRepository
+from events_aggregator.repositories.ticket_sqlalchemy import (
+    SqlAlchemyTicketRepository,
+)
 from events_aggregator.services.seats import SeatsService
 from events_aggregator.services.sync import SyncService
+from events_aggregator.services.tickets import TicketService
 
 
 async def get_http_client(
@@ -68,4 +73,18 @@ async def get_seats_service(
         events=events,
         client=client,
         cache=request.app.state.seats_cache,
+    )
+
+
+async def get_ticket_service(
+    events: EventRepository = Depends(get_event_repository),  # noqa: B008
+    db: AsyncSession = Depends(get_async_db),  # noqa: B008
+    client: EventsProviderClient = Depends(get_events_provider_client),  # noqa: B008
+) -> TicketService:
+    tickets: TicketRepository = SqlAlchemyTicketRepository(db)
+
+    return TicketService(
+        events=events,
+        tickets=tickets,
+        client=client,
     )
