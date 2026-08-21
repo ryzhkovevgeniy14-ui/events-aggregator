@@ -14,6 +14,7 @@ from events_aggregator.dependencies import (
     get_event_repository,
     get_seats_service,
     get_sync_service,
+    get_ticket_service,
 )
 from events_aggregator.repositories.event import EventRepository
 from events_aggregator.schemas.event import (
@@ -22,12 +23,18 @@ from events_aggregator.schemas.event import (
     EventsListResponse,
 )
 from events_aggregator.schemas.seats import SeatsResponse
+from events_aggregator.schemas.ticket import RegisterRequest, RegisterResponse
 from events_aggregator.services.seats import (
     EventNotFoundError,
     EventNotPublishedError,
     SeatsService,
 )
 from events_aggregator.services.sync import SyncService
+from events_aggregator.services.tickets import (
+    RegistrationDeadlinePassedError,
+    SeatNotAvailableError,
+    TicketService,
+)
 
 
 @asynccontextmanager
@@ -161,4 +168,33 @@ async def get_event_seats(
         raise HTTPException(
             status_code=400,
             detail="Event is not published",
+        )
+
+
+@app.post(
+    "/api/tickets",
+    response_model=RegisterResponse,
+    status_code=201,
+)
+async def register_ticket(
+    data: RegisterRequest,
+    ticket_service: TicketService = Depends(get_ticket_service),  # noqa: B008
+) -> RegisterResponse:
+    try:
+        return await ticket_service.register(
+            event_id=data.event_id,
+            first_name=data.first_name,
+            last_name=data.last_name,
+            email=data.email,
+            seat=data.seat,
+        )
+    except RegistrationDeadlinePassedError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+    except SeatNotAvailableError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
         )
