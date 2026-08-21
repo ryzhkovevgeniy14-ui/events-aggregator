@@ -1,5 +1,6 @@
 from datetime import date
 from unittest.mock import AsyncMock, Mock
+from uuid import UUID
 
 import httpx
 import pytest
@@ -78,12 +79,11 @@ async def test_events_next_page(client: EventsProviderClient) -> None:
 @pytest.mark.asyncio
 async def test_seats(client: EventsProviderClient) -> None:
     """Проверяет получение списка свободных мест."""
-    event_id = "550e8400-e29b-41d4-a716-446655440000"
+    event_id = UUID("550e8400-e29b-41d4-a716-446655440000")
 
     response = Mock()
     response.json.return_value = {
-        "event_id": event_id,
-        "available_seats": ["A1", "A2"],
+        "seats": ["A1", "A2"],
     }
     response.raise_for_status = Mock()
 
@@ -91,7 +91,7 @@ async def test_seats(client: EventsProviderClient) -> None:
 
     result = await client.seats(event_id)
 
-    assert result.available_seats == ["A1", "A2"]
+    assert result.seats == ["A1", "A2"]
 
     client.client.get.assert_awaited_once_with(
         f"http://events-provider/api/events/{event_id}/seats/",
