@@ -6,7 +6,7 @@ from uuid import UUID
 import httpx
 
 from events_aggregator.schemas.event import EventsResponse
-from events_aggregator.schemas.seats import SeatsResponse
+from events_aggregator.schemas.seats import ProviderSeatsResponse
 from events_aggregator.schemas.ticket import RegisterResponse, UnregisterResponse
 
 
@@ -44,7 +44,7 @@ class EventsProviderClient:
 
         return EventsResponse.model_validate(response.json())
 
-    async def seats(self, event_id: UUID) -> SeatsResponse:
+    async def seats(self, event_id: UUID) -> ProviderSeatsResponse:
         response = await self.client.get(
             f"{self.base_url}/api/events/{event_id}/seats/",
             headers={"x-api-key": self.api_key},
@@ -52,7 +52,7 @@ class EventsProviderClient:
 
         response.raise_for_status()
 
-        return SeatsResponse.model_validate(response.json())
+        return ProviderSeatsResponse.model_validate(response.json())
 
     async def register(
         self,
