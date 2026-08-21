@@ -49,7 +49,7 @@ async def trigger_sync(
     return {"status": "ok"}
 
 
-@app.get("/api/events/", response_model=EventsListResponse)
+@app.get("/api/events", response_model=EventsListResponse)
 async def list_events(
     request: Request,
     date_from: date | None = None,
