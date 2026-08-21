@@ -35,6 +35,12 @@ async def get_events_provider_client(
     )
 
 
+async def get_event_repository(
+    db: AsyncSession = Depends(get_async_db),  # noqa: B008
+) -> SqlAlchemyEventRepository:
+    return SqlAlchemyEventRepository(db)
+
+
 async def get_sync_service(
     client: EventsProviderClient = Depends(get_events_provider_client),  # noqa: B008
     db: AsyncSession = Depends(get_async_db),  # noqa: B008
