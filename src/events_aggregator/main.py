@@ -26,18 +26,22 @@ from events_aggregator.schemas.event import (
     EventsListResponse,
 )
 from events_aggregator.schemas.seats import SeatsResponse
-from events_aggregator.schemas.ticket import RegisterRequest, RegisterResponse
-from events_aggregator.services.seats import (
+from events_aggregator.schemas.ticket import (
+    RegisterRequest,
+    RegisterResponse,
+    UnregisterResponse,
+)
+from events_aggregator.services.exceptions import (
+    EventAlreadyPassedError,
     EventNotFoundError,
     EventNotPublishedError,
-    SeatsService,
-)
-from events_aggregator.services.sync import SyncService
-from events_aggregator.services.tickets import (
     RegistrationDeadlinePassedError,
     SeatNotAvailableError,
-    TicketService,
+    TicketNotFoundError,
 )
+from events_aggregator.services.seats import SeatsService
+from events_aggregator.services.sync import SyncService
+from events_aggregator.services.tickets import TicketService
 
 
 @asynccontextmanager
@@ -211,6 +215,33 @@ async def register_ticket(
             detail=str(exc),
         )
     except SeatNotAvailableError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+
+@app.delete(
+    "/api/tickets/{ticket_id}",
+    response_model=UnregisterResponse,
+)
+async def unregister_ticket(
+    ticket_id: UUID,
+    ticket_service: TicketService = Depends(get_ticket_service),  # noqa: B008
+) -> UnregisterResponse:
+    try:
+        return await ticket_service.unregister(ticket_id)
+    except TicketNotFoundError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        )
+    except EventNotFoundError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        )
+    except EventAlreadyPassedError as exc:
         raise HTTPException(
             status_code=400,
             detail=str(exc),
