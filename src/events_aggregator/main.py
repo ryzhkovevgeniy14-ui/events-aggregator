@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from events_aggregator.db.depends import get_async_db
 from events_aggregator.dependencies import (
     get_event_repository,
+    get_seats_service,
     get_sync_service,
 )
 from events_aggregator.repositories.event import EventRepository
@@ -20,6 +21,12 @@ from events_aggregator.schemas.event import (
     EventResponse,
     EventsListResponse,
 )
+from events_aggregator.schemas.seats import SeatsResponse
+from events_aggregator.services.seats import (
+    EventNotFoundError,
+    EventNotPublishedError,
+    SeatsService,
+)
 from events_aggregator.services.sync import SyncService
 
 
@@ -27,6 +34,7 @@ from events_aggregator.services.sync import SyncService
 async def lifespan(app: FastAPI):
     async with httpx.AsyncClient() as client:
         app.state.http_client = client
+        app.state.seats_cache = {}
         yield
 
 
@@ -132,3 +140,25 @@ async def get_event(
         )
 
     return EventResponse.model_validate(event)
+
+
+@app.get(
+    "/api/events/{event_id}/seats",
+    response_model=SeatsResponse,
+)
+async def get_event_seats(
+    event_id: UUID,
+    seats_service: SeatsService = Depends(get_seats_service),  # noqa: B008
+) -> SeatsResponse:
+    try:
+        return await seats_service.get_seats(event_id)
+    except EventNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="Event not found",
+        )
+    except EventNotPublishedError:
+        raise HTTPException(
+            status_code=400,
+            detail="Event is not published",
+        )
