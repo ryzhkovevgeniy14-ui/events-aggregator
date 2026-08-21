@@ -6,6 +6,9 @@ from uuid import UUID
 
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -49,6 +52,20 @@ app = FastAPI(
     title="Events Aggregator",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request,
+    exc: RequestValidationError,
+):
+    if request.url.path == "/api/tickets":
+        return JSONResponse(
+            status_code=400,
+            content={"detail": exc.errors()},
+        )
+
+    return await request_validation_exception_handler(request, exc)
 
 
 @app.get("/api/health")
