@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from contextlib import asynccontextmanager
 from datetime import date, datetime, time
 from uuid import UUID
@@ -41,6 +42,7 @@ from events_aggregator.services.exceptions import (
 )
 from events_aggregator.services.seats import SeatsService
 from events_aggregator.services.sync import SyncService
+from events_aggregator.services.sync_worker import sync_worker
 from events_aggregator.services.tickets import TicketService
 
 
@@ -49,7 +51,14 @@ async def lifespan(app: FastAPI):
     async with httpx.AsyncClient() as client:
         app.state.http_client = client
         app.state.seats_cache = {}
-        yield
+
+        worker = asyncio.create_task(sync_worker(client))
+
+        try:
+            yield
+        finally:
+            worker.cancel()
+            await worker
 
 
 app = FastAPI(
