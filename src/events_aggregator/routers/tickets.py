@@ -11,6 +11,7 @@ from events_aggregator.schemas.ticket import (
 from events_aggregator.services.exceptions import (
     EventAlreadyPassedError,
     EventNotFoundError,
+    EventNotPublishedError,
     RegistrationDeadlinePassedError,
     SeatNotAvailableError,
     TicketNotFoundError,
@@ -37,16 +38,26 @@ async def register_ticket(
             email=data.email,
             seat=data.seat,
         )
+    except EventNotFoundError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        ) from exc
+    except EventNotPublishedError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
     except RegistrationDeadlinePassedError as exc:
         raise HTTPException(
             status_code=400,
             detail=str(exc),
-        )
+        ) from exc
     except SeatNotAvailableError as exc:
         raise HTTPException(
             status_code=400,
             detail=str(exc),
-        )
+        ) from exc
 
 
 @router.delete(
@@ -63,14 +74,14 @@ async def unregister_ticket(
         raise HTTPException(
             status_code=404,
             detail=str(exc),
-        )
+        ) from exc
     except EventNotFoundError as exc:
         raise HTTPException(
             status_code=404,
             detail=str(exc),
-        )
+        ) from exc
     except EventAlreadyPassedError as exc:
         raise HTTPException(
             status_code=400,
             detail=str(exc),
-        )
+        ) from exc
