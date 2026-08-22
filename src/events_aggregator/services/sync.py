@@ -4,6 +4,7 @@ from datetime import date, datetime, timezone
 
 from events_aggregator.clients.events_paginator import EventsPaginator
 from events_aggregator.clients.events_provider import EventsProviderClient
+from events_aggregator.core.logging import logger
 from events_aggregator.models.event import Event
 from events_aggregator.models.place import Place
 from events_aggregator.models.sync_state import SyncState
@@ -28,6 +29,8 @@ class SyncService:
         self.sync_state = sync_state
 
     async def sync(self) -> None:
+        logger.info("Synchronization started")
+
         state = await self.sync_state.get()
 
         if state is None:
@@ -38,6 +41,11 @@ class SyncService:
             )
             changed_at = date(2000, 1, 1)
             await self.sync_state.save(state)
+
+            logger.info(
+                "First synchronization started from %s",
+                changed_at,
+            )
         else:
             state.sync_status = "running"
 
@@ -47,17 +55,25 @@ class SyncService:
                 else date(2000, 1, 1)
             )
 
+            logger.info(
+                "Incremental synchronization started from %s",
+                changed_at,
+            )
+
         paginator = EventsPaginator(
             client=self.client,
             changed_at=changed_at,
         )
 
         max_changed_at = state.last_changed_at
+        synced_events = 0
 
         try:
             async for provider_event in paginator:
                 await self._sync_place(provider_event.place)
                 await self._sync_event(provider_event)
+
+                synced_events += 1
 
                 if (
                     max_changed_at is None
@@ -71,9 +87,21 @@ class SyncService:
 
             await self.sync_state.save(state)
 
+            logger.info(
+                "Synchronization completed successfully. "
+                "Events processed: %d",
+                synced_events,
+            )
+
         except Exception:
             state.sync_status = "failed"
             await self.sync_state.save(state)
+
+            logger.exception(
+                "Synchronization failed. Events processed: %d",
+                synced_events,
+            )
+
             raise
 
     async def _sync_place(
