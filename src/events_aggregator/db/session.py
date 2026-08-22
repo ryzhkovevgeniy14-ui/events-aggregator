@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from events_aggregator.config import settings
+from events_aggregator.core.config import settings
 
 database_url = settings.postgres_connection_string.replace(
     "postgres://",

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from events_aggregator import models  # noqa: F401
-from events_aggregator.config import settings
+from events_aggregator.core.config import settings
 from events_aggregator.db.base import Base
 
 # this is the Alembic Config object, which provides

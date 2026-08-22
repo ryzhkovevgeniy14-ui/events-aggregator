@@ -5,7 +5,7 @@ from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from events_aggregator.clients.events_provider import EventsProviderClient
-from events_aggregator.config import settings
+from events_aggregator.core.config import settings
 from events_aggregator.db.depends import get_async_db
 from events_aggregator.repositories.event import EventRepository
 from events_aggregator.repositories.event_sqlalchemy import (
