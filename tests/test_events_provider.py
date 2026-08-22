@@ -1,3 +1,4 @@
+import asyncio
 from datetime import date
 from unittest.mock import AsyncMock, Mock
 from uuid import UUID
@@ -31,7 +32,7 @@ async def test_events_first_page(client: EventsProviderClient) -> None:
     }
     response.raise_for_status = Mock()
 
-    client.client.get.return_value = response
+    client.client.request.return_value = response
 
     result = await client.events(date(2000, 1, 1))
 
@@ -39,7 +40,8 @@ async def test_events_first_page(client: EventsProviderClient) -> None:
     assert result.previous is None
     assert result.results == []
 
-    client.client.get.assert_awaited_once_with(
+    client.client.request.assert_awaited_once_with(
+        "GET",
         "http://events-provider/api/events/",
         params={"changed_at": "2000-01-01"},
         headers={"x-api-key": "test-api-key"},
@@ -57,7 +59,7 @@ async def test_events_next_page(client: EventsProviderClient) -> None:
     }
     response.raise_for_status = Mock()
 
-    client.client.get.return_value = response
+    client.client.request.return_value = response
 
     next_url = "http://events-provider/api/events/?cursor=next"
 
@@ -70,7 +72,8 @@ async def test_events_next_page(client: EventsProviderClient) -> None:
         "http://events-provider/api/events/?cursor=previous"
     )
 
-    client.client.get.assert_awaited_once_with(
+    client.client.request.assert_awaited_once_with(
+        "GET",
         next_url,
         headers={"x-api-key": "test-api-key"},
     )
@@ -87,13 +90,14 @@ async def test_seats(client: EventsProviderClient) -> None:
     }
     response.raise_for_status = Mock()
 
-    client.client.get.return_value = response
+    client.client.request.return_value = response
 
     result = await client.seats(event_id)
 
     assert result.seats == ["A1", "A2"]
 
-    client.client.get.assert_awaited_once_with(
+    client.client.request.assert_awaited_once_with(
+        "GET",
         f"http://events-provider/api/events/{event_id}/seats/",
         headers={"x-api-key": "test-api-key"},
     )
@@ -111,7 +115,7 @@ async def test_register(client: EventsProviderClient) -> None:
     }
     response.raise_for_status = Mock()
 
-    client.client.post.return_value = response
+    client.client.request.return_value = response
 
     result = await client.register(
         event_id=event_id,
@@ -123,7 +127,8 @@ async def test_register(client: EventsProviderClient) -> None:
 
     assert str(result.ticket_id) == ticket_id
 
-    client.client.post.assert_awaited_once_with(
+    client.client.request.assert_awaited_once_with(
+        "POST",
         f"http://events-provider/api/events/{event_id}/register/",
         headers={"x-api-key": "test-api-key"},
         json={
@@ -162,3 +167,61 @@ async def test_unregister(client: EventsProviderClient) -> None:
         headers={"x-api-key": "test-api-key"},
         json={"ticket_id": ticket_id},
     )
+
+
+@pytest.mark.asyncio
+async def test_events_retry_on_network_error(
+    client: EventsProviderClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Проверяет повтор запроса после временной сетевой ошибки."""
+    response = Mock()
+    response.json.return_value = {
+        "next": None,
+        "previous": None,
+        "results": [],
+    }
+    response.raise_for_status = Mock()
+
+    client.client.request.side_effect = [
+        httpx.ConnectError("Connection failed"),
+        response,
+    ]
+
+    sleep_mock = AsyncMock()
+    monkeypatch.setattr(asyncio, "sleep", sleep_mock)
+
+    result = await client.events(date(2000, 1, 1))
+
+    assert result.results == []
+
+    assert client.client.request.await_count == 2
+
+    sleep_mock.assert_awaited_once_with(1)
+
+
+@pytest.mark.asyncio
+async def test_events_retry_exhausted(
+    client: EventsProviderClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Проверяет проброс ошибки после исчерпания попыток."""
+    error = httpx.ConnectError("Connection failed")
+
+    client.client.request.side_effect = [
+        error,
+        error,
+        error,
+    ]
+
+    sleep_mock = AsyncMock()
+    monkeypatch.setattr(asyncio, "sleep", sleep_mock)
+
+    with pytest.raises(httpx.ConnectError):
+        await client.events(date(2000, 1, 1))
+
+    assert client.client.request.await_count == 3
+
+    assert sleep_mock.await_count == 2
+    sleep_mock.assert_any_await(1)
+    sleep_mock.assert_any_await(2)
