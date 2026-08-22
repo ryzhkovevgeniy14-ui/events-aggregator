@@ -25,7 +25,7 @@ async def sync_worker(
 ) -> None:
     while True:
         try:
-            async with async_session_maker() as db:
+            async with async_session_maker() as db, db.begin():
                 sync_service = SyncService(
                     client=EventsProviderClient(
                         base_url=settings.events_provider_base_url,
