@@ -4,6 +4,7 @@ from datetime import date, datetime, timezone
 
 from events_aggregator.clients.events_paginator import EventsPaginator
 from events_aggregator.clients.events_provider import EventsProviderClient
+from events_aggregator.core.enums import SyncStatus
 from events_aggregator.core.logging import logger
 from events_aggregator.models.event import Event
 from events_aggregator.models.place import Place
@@ -51,7 +52,7 @@ class SyncService:
             state = SyncState(
                 last_sync_time=None,
                 last_changed_at=None,
-                sync_status="running",
+                sync_status=SyncStatus.RUNNING,
             )
             changed_at = date(2000, 1, 1)
             await self.sync_state.save(state)
@@ -61,7 +62,7 @@ class SyncService:
                 changed_at,
             )
         else:
-            state.sync_status = "running"
+            state.sync_status = SyncStatus.RUNNING
 
             changed_at = (
                 state.last_changed_at.date()
@@ -97,7 +98,7 @@ class SyncService:
 
             state.last_sync_time = datetime.now(timezone.utc)
             state.last_changed_at = max_changed_at
-            state.sync_status = "success"
+            state.sync_status = SyncStatus.SUCCESS
 
             await self.sync_state.save(state)
 
@@ -108,7 +109,7 @@ class SyncService:
             )
 
         except Exception:
-            state.sync_status = "failed"
+            state.sync_status = SyncStatus.FAILED
             await self.sync_state.save(state)
 
             logger.exception(

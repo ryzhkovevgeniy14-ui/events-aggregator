@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 from events_aggregator.clients.events_provider import EventsProviderClient
+from events_aggregator.core.enums import EventStatus
 from events_aggregator.repositories.event import EventRepository
 from events_aggregator.schemas.seats import SeatsResponse
 from events_aggregator.services.exceptions import (
@@ -43,7 +44,7 @@ class SeatsService:
         if event is None:
             raise EventNotFoundError
 
-        if event.status != "published":
+        if event.status != EventStatus.PUBLISHED:
             raise EventNotPublishedError
 
         cached = self.cache.get(event_id)

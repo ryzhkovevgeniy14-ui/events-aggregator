@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from events_aggregator.core.enums import TicketStatus
 from events_aggregator.db.base import Base
 
 if TYPE_CHECKING:
@@ -26,9 +27,9 @@ class Ticket(Base):
     last_name: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(255))
     seat: Mapped[str] = mapped_column(String(50))
-    status: Mapped[str] = mapped_column(
+    status: Mapped[TicketStatus] = mapped_column(
         String(50),
-        default="active",
+        default=TicketStatus.ACTIVE,
     )
 
     event: Mapped["Event"] = relationship(

@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
+from events_aggregator.core.enums import SyncStatus
 from events_aggregator.models.sync_state import SyncState
 from events_aggregator.schemas.event import EventResponse
 from events_aggregator.schemas.place import PlaceResponse
@@ -163,7 +164,7 @@ async def test_first_sync(
     state = sync_state.save.call_args_list[-1].args[0]
 
     assert state.last_changed_at == event.changed_at
-    assert state.sync_status == "success"
+    assert state.sync_status == SyncStatus.SUCCESS
     assert state.last_sync_time is not None
 
 
@@ -204,7 +205,7 @@ async def test_incremental_sync(
             tzinfo=timezone.utc,
         ),
         last_changed_at=last_changed_at,
-        sync_status="success",
+        sync_status=SyncStatus.SUCCESS,
     )
 
     paginator_class = Mock(
@@ -233,7 +234,7 @@ async def test_incremental_sync(
     state = sync_state.save.call_args_list[-1].args[0]
 
     assert state.last_changed_at == last_changed_at
-    assert state.sync_status == "success"
+    assert state.sync_status == SyncStatus.SUCCESS
 
 
 @pytest.mark.asyncio
@@ -279,4 +280,4 @@ async def test_sync_failed(
 
     state = sync_state.save.call_args_list[-1].args[0]
 
-    assert state.sync_status == "failed"
+    assert state.sync_status == SyncStatus.FAILED

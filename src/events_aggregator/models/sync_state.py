@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
 
+from events_aggregator.core.enums import SyncStatus
 from events_aggregator.db.base import Base
 
 
@@ -22,7 +23,7 @@ class SyncState(Base):
     last_changed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
     )
-    sync_status: Mapped[str] = mapped_column(
+    sync_status: Mapped[SyncStatus] = mapped_column(
         String(50),
-        default="never",
+        default=SyncStatus.NEVER,
     )

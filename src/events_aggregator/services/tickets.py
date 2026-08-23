@@ -6,6 +6,7 @@ from uuid import UUID
 import httpx
 
 from events_aggregator.clients.events_provider import EventsProviderClient
+from events_aggregator.core.enums import EventStatus, TicketStatus
 from events_aggregator.models.ticket import Ticket
 from events_aggregator.repositories.event import EventRepository
 from events_aggregator.repositories.ticket import TicketRepository
@@ -53,7 +54,7 @@ class TicketService:
         if event is None:
             raise EventNotFoundError("Event not found")
 
-        if event.status != "published":
+        if event.status != EventStatus.PUBLISHED:
             raise EventNotPublishedError("Event is not published")
 
         if datetime.now(timezone.utc) >= event.registration_deadline:
@@ -88,7 +89,7 @@ class TicketService:
             last_name=last_name,
             email=email,
             seat=seat,
-            status="active",
+            status=TicketStatus.ACTIVE,
         )
 
         await self.tickets.create(ticket)
@@ -125,6 +126,6 @@ class TicketService:
             ticket_id=ticket_id,
         )
 
-        ticket.status = "cancelled"
+        ticket.status = TicketStatus.CANCELLED
 
         return response
