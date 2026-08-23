@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import date
+from urllib.parse import urljoin
 from uuid import UUID
 
 import httpx
@@ -75,7 +76,7 @@ class EventsProviderClient:
         полученного от API.
         """
         if url is None:
-            url = f"{self.base_url}/api/events/"
+            url = urljoin(self.base_url, "api/events/")
 
             response = await self._request(
                 "GET",
@@ -99,7 +100,7 @@ class EventsProviderClient:
         """
         response = await self._request(
             "GET",
-            f"{self.base_url}/api/events/{event_id}/seats/",
+            urljoin(self.base_url, f"api/events/{event_id}/seats/"),
             headers={"x-api-key": self.api_key},
         )
 
@@ -119,7 +120,7 @@ class EventsProviderClient:
         """
         response = await self._request(
             "POST",
-            f"{self.base_url}/api/events/{event_id}/register/",
+            urljoin(self.base_url, f"api/events/{event_id}/register/"),
             headers={"x-api-key": self.api_key},
             json={
                 "first_name": first_name,
@@ -142,7 +143,7 @@ class EventsProviderClient:
         """
         response = await self._request(
             "DELETE",
-            f"{self.base_url}/api/events/{event_id}/unregister/",
+            urljoin(self.base_url, f"api/events/{event_id}/unregister/"),
             headers={"x-api-key": self.api_key},
             json={"ticket_id": str(ticket_id)},
         )
