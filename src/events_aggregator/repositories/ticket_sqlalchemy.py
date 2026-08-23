@@ -9,6 +9,10 @@ from events_aggregator.models.ticket import Ticket
 
 
 class SqlAlchemyTicketRepository:
+    """
+    SQLAlchemy-реализация репозитория для работы с регистрациями.
+    Выполняет операции с таблицей регистраций через AsyncSession.
+    """
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 

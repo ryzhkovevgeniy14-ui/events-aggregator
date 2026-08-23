@@ -13,17 +13,31 @@ from events_aggregator.services.exceptions import (
 
 
 class SeatsService:
+    """
+    Сервис для получения свободных мест на мероприятии.
+
+    Проверяет существование и статус мероприятия, использует
+    кэширование списка мест на 30 секунд и при необходимости
+    запрашивает актуальные данные у Events Provider API.
+    """
     def __init__(
         self,
         events: EventRepository,
         client: EventsProviderClient,
-        cache: dict[UUID, tuple[datetime, list[str]]]
+        cache: dict[UUID, tuple[datetime, list[str]]],
     ) -> None:
         self.events = events
         self.client = client
         self.cache = cache
 
     async def get_seats(self, event_id: UUID) -> SeatsResponse:
+        """
+        Возвращает список свободных мест для указанного мероприятия.
+
+        Данные берутся из кэша, если они были получены менее 30 секунд
+        назад. Перед обращением к внешнему API проверяется существование
+        мероприятия и его статус.
+        """
         event = await self.events.get(event_id)
 
         if event is None:

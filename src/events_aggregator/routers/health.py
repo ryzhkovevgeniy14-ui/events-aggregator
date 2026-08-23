@@ -11,6 +11,9 @@ router = APIRouter()
 async def health_check(
     db: AsyncSession = Depends(get_async_db),  # noqa: B008
 ) -> dict[str, str]:
+    """
+    Проверяет доступность приложения и подключения к базе данных.
+    """
     await db.execute(text("SELECT 1"))
 
     return {"status": "ok"}

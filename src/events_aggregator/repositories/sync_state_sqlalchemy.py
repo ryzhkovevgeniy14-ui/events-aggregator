@@ -7,6 +7,12 @@ from events_aggregator.models.sync_state import SyncState
 
 
 class SqlAlchemySyncStateRepository:
+    """
+    SQLAlchemy-реализация репозитория состояния синхронизации.
+
+    Выполняет операции с таблицей состояния синхронизации
+    через AsyncSession.
+    """
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 

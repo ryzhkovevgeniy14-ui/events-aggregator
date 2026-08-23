@@ -11,6 +11,10 @@ from events_aggregator.models.event import Event
 
 
 class SqlAlchemyEventRepository:
+    """
+    SQLAlchemy-реализация репозитория для работы с мероприятиями.
+    Выполняет операции с таблицей событий через AsyncSession.
+    """
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 

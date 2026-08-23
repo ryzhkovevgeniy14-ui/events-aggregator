@@ -21,6 +21,9 @@ from events_aggregator.services.exceptions import (
 
 
 class TicketService:
+    """
+    Сервис регистрации и отмены регистрации на мероприятия.
+    """
     def __init__(
         self,
         events: EventRepository,
@@ -39,6 +42,12 @@ class TicketService:
         email: str,
         seat: str,
     ) -> RegisterResponse:
+        """
+        Регистрирует пользователя на мероприятие.
+
+        Проверяет доступность мероприятия и места, выполняет
+        регистрацию через Events Provider и сохраняет билет в базе данных.
+        """
         event = await self.events.get(event_id)
 
         if event is None:
@@ -90,6 +99,12 @@ class TicketService:
         self,
         ticket_id: UUID,
     ) -> UnregisterResponse:
+        """
+        Отменяет регистрацию пользователя на мероприятие.
+
+        Проверяет существование билета и то, что мероприятие ещё не началось,
+        затем отменяет регистрацию через Events Provider.
+        """
         ticket = await self.tickets.get(ticket_id)
 
         if ticket is None:

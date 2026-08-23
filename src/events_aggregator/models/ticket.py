@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 
 class Ticket(Base):
+    """ORM-модель таблицы регистраций участников на мероприятия."""
     __tablename__ = "tickets"
 
     id: Mapped[uuid.UUID] = mapped_column(

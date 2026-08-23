@@ -21,15 +21,14 @@ from events_aggregator.services.tickets import TicketService
 router = APIRouter()
 
 
-@router.post(
-    "/api/tickets",
-    response_model=RegisterResponse,
-    status_code=201,
-)
+@router.post("/api/tickets", response_model=RegisterResponse, status_code=201)
 async def register_ticket(
     data: RegisterRequest,
     ticket_service: TicketService = Depends(get_ticket_service),  # noqa: B008
 ) -> RegisterResponse:
+    """
+    Регистрирует пользователя на мероприятие и выбранное место.
+    """
     try:
         return await ticket_service.register(
             event_id=data.event_id,
@@ -60,14 +59,14 @@ async def register_ticket(
         ) from exc
 
 
-@router.delete(
-    "/api/tickets/{ticket_id}",
-    response_model=UnregisterResponse,
-)
+@router.delete("/api/tickets/{ticket_id}", response_model=UnregisterResponse)
 async def unregister_ticket(
     ticket_id: UUID,
     ticket_service: TicketService = Depends(get_ticket_service),  # noqa: B008
 ) -> UnregisterResponse:
+    """
+    Отменяет регистрацию пользователя на мероприятие по идентификатору билета.
+    """
     try:
         return await ticket_service.unregister(ticket_id)
     except TicketNotFoundError as exc:

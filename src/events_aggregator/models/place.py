@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 
 class Place(Base):
+    """ORM-модель таблицы площадок проведения мероприятий."""
     __tablename__ = "places"
 
     id: Mapped[uuid.UUID] = mapped_column(

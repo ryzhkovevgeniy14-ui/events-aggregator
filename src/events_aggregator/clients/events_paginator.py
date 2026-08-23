@@ -8,6 +8,14 @@ from events_aggregator.schemas.event import EventResponse
 
 
 class EventsPaginator:
+    """
+    Асинхронный итератор для последовательного получения событий.
+
+    Использует Events Provider API и автоматически переходит
+    по ссылкам next между страницами.
+
+    Используется при полной или инкрементальной синхронизации событий.
+    """
     def __init__(
         self,
         client: EventsProviderClient,
@@ -20,9 +28,14 @@ class EventsPaginator:
         self.finished = False
 
     def __aiter__(self) -> AsyncIterator[EventResponse]:
+        """Возвращает текущий объект в качестве асинхронного итератора."""
         return self
 
     async def __anext__(self) -> EventResponse:
+        """
+        Возвращает следующее событие из текущей или следующей страницы.
+        При достижении последней страницы завершает итерацию.
+        """
         if self.events:
             return self.events.pop(0)
 

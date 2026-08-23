@@ -15,6 +15,7 @@ from events_aggregator.services.sync_worker import sync_worker
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Управляет ресурсами приложения в течение его жизненного цикла."""
     async with httpx.AsyncClient() as client:
         app.state.http_client = client
         app.state.seats_cache = {}
@@ -24,6 +25,7 @@ async def lifespan(app: FastAPI):
         try:
             yield
         finally:
+            # Останавливаем фоновую синхронизацию перед завершением приложения
             worker.cancel()
             await worker
 
@@ -39,6 +41,7 @@ async def validation_exception_handler(
     request: Request,
     exc: RequestValidationError,
 ):
+    """Возвращает ошибки валидации в формате, ожидаемом API."""
     if request.url.path == "/api/tickets":
         return JSONResponse(
             status_code=400,

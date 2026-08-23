@@ -33,6 +33,12 @@ async def list_events(
     page_size: int = 20,
     events: EventRepository = Depends(get_event_repository),  # noqa: B008
 ) -> EventsListResponse:
+    """
+    Возвращает список мероприятий с пагинацией.
+
+    Поддерживает фильтрацию по дате начала мероприятия и формирует
+    ссылки на следующую и предыдущую страницы.
+    """
     date_from_datetime = (
         datetime.combine(date_from, time.min)
         if date_from is not None
@@ -91,6 +97,9 @@ async def get_event(
     event_id: UUID,
     events: EventRepository = Depends(get_event_repository),  # noqa: B008
 ) -> EventResponse:
+    """
+    Возвращает мероприятие по его идентификатору.
+    """
     event = await events.get(event_id)
 
     if event is None:
@@ -107,6 +116,9 @@ async def get_event_seats(
     event_id: UUID,
     seats_service: SeatsService = Depends(get_seats_service),  # noqa: B008
 ) -> SeatsResponse:
+    """
+    Возвращает список доступных мест для опубликованного мероприятия.
+    """
     try:
         return await seats_service.get_seats(event_id)
     except EventNotFoundError:

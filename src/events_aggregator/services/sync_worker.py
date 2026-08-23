@@ -19,10 +19,18 @@ from events_aggregator.repositories.sync_state_sqlalchemy import (
 )
 from events_aggregator.services.sync import SyncService
 
+SYNC_INTERVAL = 24 * 60 * 60
+
 
 async def sync_worker(
     client: httpx.AsyncClient,
 ) -> None:
+    """
+    Выполняет фоновую синхронизацию данных каждые 24 часа.
+
+    Ошибки отдельной синхронизации логируются, но не останавливают
+    фоновый процесс.
+    """
     while True:
         try:
             async with async_session_maker() as db, db.begin():
@@ -45,4 +53,4 @@ async def sync_worker(
         except Exception:  # noqa: BLE001
             logger.exception("Background synchronization failed")
 
-        await asyncio.sleep(24 * 60 * 60)
+        await asyncio.sleep(SYNC_INTERVAL)

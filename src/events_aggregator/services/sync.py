@@ -16,6 +16,12 @@ from events_aggregator.schemas.place import PlaceResponse
 
 
 class SyncService:
+    """
+    Сервис синхронизации мероприятий и площадок с Events Provider.
+
+    Выполняет первичную или инкрементальную синхронизацию данных,
+    обновляет состояние синхронизации и сохраняет результат выполнения.
+    """
     def __init__(
         self,
         client: EventsProviderClient,
@@ -29,6 +35,14 @@ class SyncService:
         self.sync_state = sync_state
 
     async def sync(self) -> None:
+        """
+        Выполняет синхронизацию мероприятий и площадок с Events Provider.
+
+        При первой синхронизации обработка начинается с даты 2000-01-01.
+        При последующих синхронизациях используется дата последнего
+        успешно обработанного изменения. Состояние синхронизации
+        обновляется в зависимости от результата выполнения.
+        """
         logger.info("Synchronization started")
 
         state = await self.sync_state.get()
@@ -108,6 +122,9 @@ class SyncService:
         self,
         provider_place: PlaceResponse
     ) -> Place:
+        """
+        Создаёт или обновляет площадку на основе данных Events Provider.
+        """
         place = await self.places.get(provider_place.id)
 
         if place is None:
@@ -136,6 +153,9 @@ class SyncService:
         self,
         provider_event: EventResponse,
     ) -> None:
+        """
+        Создаёт или обновляет мероприятие на основе данных Events Provider.
+        """
         event = await self.events.get(provider_event.id)
 
         if event is None:

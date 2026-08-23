@@ -12,8 +12,15 @@ from events_aggregator.schemas.ticket import RegisterResponse, UnregisterRespons
 
 
 class EventsProviderClient:
-    MAX_ATTEMPTS = 3
-    RETRY_DELAYS = (1, 2)
+    """
+    Клиент для взаимодействия с Events Provider API.
+
+    Отвечает за выполнение HTTP-запросов к внешнему сервису,
+    передачу API-ключа, обработку временных ошибок и преобразование
+    ответов в Pydantic-модели.
+    """
+    MAX_ATTEMPTS = 3  # Максимальное количество попыток одного HTTP-запроса
+    RETRY_DELAYS = (1, 2)  # Задержки между повторными попытками в секундах
 
     def __init__(
         self,
@@ -31,6 +38,12 @@ class EventsProviderClient:
         url: str,
         **kwargs: object,
     ) -> httpx.Response:
+        """
+        Выполняет HTTP-запрос с повторными попытками.
+
+        Повторяет запрос при временной ошибке соединения
+        с задержками, заданными в RETRY_DELAYS.
+        """
         for attempt in range(self.MAX_ATTEMPTS):
             try:
                 response = await self.client.request(
@@ -54,6 +67,13 @@ class EventsProviderClient:
         changed_at: date,
         url: str | None = None,
     ) -> EventsResponse:
+        """
+        Получает страницу событий из Events Provider API.
+
+        Для первого запроса использует параметр changed_at.
+        Для последующих страниц использует URL из поля next,
+        полученного от API.
+        """
         if url is None:
             url = f"{self.base_url}/api/events/"
 
@@ -73,6 +93,10 @@ class EventsProviderClient:
         return EventsResponse.model_validate(response.json())
 
     async def seats(self, event_id: UUID) -> ProviderSeatsResponse:
+        """
+        Получает актуальный список свободных мест мероприятия.
+        Выполняет запрос непосредственно к Events Provider API.
+        """
         response = await self._request(
             "GET",
             f"{self.base_url}/api/events/{event_id}/seats/",
@@ -89,6 +113,10 @@ class EventsProviderClient:
         email: str,
         seat: str,
     ) -> RegisterResponse:
+        """
+        Регистрирует участника на мероприятие через Events Provider API.
+        Передаёт данные участника и выбранное место.
+        """
         response = await self._request(
             "POST",
             f"{self.base_url}/api/events/{event_id}/register/",
@@ -108,6 +136,10 @@ class EventsProviderClient:
         event_id: UUID,
         ticket_id: UUID,
     ) -> UnregisterResponse:
+        """
+        Отменяет регистрацию участника через Events Provider API.
+        Для отмены передаёт идентификатор билета.
+        """
         response = await self._request(
             "DELETE",
             f"{self.base_url}/api/events/{event_id}/unregister/",

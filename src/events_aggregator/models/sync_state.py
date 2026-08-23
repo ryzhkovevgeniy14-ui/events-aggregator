@@ -9,6 +9,7 @@ from events_aggregator.db.base import Base
 
 
 class SyncState(Base):
+    """ORM-модель таблицы состояния синхронизации событий."""
     __tablename__ = "sync_state"
 
     id: Mapped[int] = mapped_column(

@@ -9,6 +9,10 @@ from events_aggregator.models.place import Place
 
 
 class SqlAlchemyPlaceRepository:
+    """
+    SQLAlchemy-реализация репозитория для работы с площадками.
+    Выполняет операции с таблицей площадок через AsyncSession.
+    """
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 

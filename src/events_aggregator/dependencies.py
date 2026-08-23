@@ -29,12 +29,14 @@ from events_aggregator.services.tickets import TicketService
 async def get_http_client(
     request: Request,
 ) -> httpx.AsyncClient:
+    """Возвращает общий HTTP-клиент, созданный при запуске приложения."""
     return request.app.state.http_client
 
 
 async def get_events_provider_client(
     client: httpx.AsyncClient = Depends(get_http_client),  # noqa: B008
 ) -> EventsProviderClient:
+    """Создаёт клиент для взаимодействия с Events Provider API."""
     return EventsProviderClient(
         base_url=settings.events_provider_base_url,
         api_key=settings.events_provider_api_key,
@@ -45,6 +47,7 @@ async def get_events_provider_client(
 async def get_event_repository(
     db: AsyncSession = Depends(get_async_db),  # noqa: B008
 ) -> SqlAlchemyEventRepository:
+    """Создаёт репозиторий событий на основе текущей DB-сессии."""
     return SqlAlchemyEventRepository(db)
 
 
@@ -52,6 +55,7 @@ async def get_sync_service(
     client: EventsProviderClient = Depends(get_events_provider_client),  # noqa: B008
     db: AsyncSession = Depends(get_async_db),  # noqa: B008
 ) -> SyncService:
+    """Создаёт сервис синхронизации с необходимыми зависимостями."""
     events = SqlAlchemyEventRepository(db)
     places = SqlAlchemyPlaceRepository(db)
     sync_state = SqlAlchemySyncStateRepository(db)
@@ -69,6 +73,7 @@ async def get_seats_service(
     events: EventRepository = Depends(get_event_repository),  # noqa: B008
     client: EventsProviderClient = Depends(get_events_provider_client),  # noqa: B008
 ) -> SeatsService:
+    """Создаёт сервис для работы со свободными местами и их кэшем."""
     return SeatsService(
         events=events,
         client=client,
@@ -81,6 +86,7 @@ async def get_ticket_service(
     db: AsyncSession = Depends(get_async_db),  # noqa: B008
     client: EventsProviderClient = Depends(get_events_provider_client),  # noqa: B008
 ) -> TicketService:
+    """Создаёт сервис регистрации и отмены регистрации на события."""
     tickets: TicketRepository = SqlAlchemyTicketRepository(db)
 
     return TicketService(

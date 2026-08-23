@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 
 class Event(Base):
+    """ORM-модель таблицы мероприятий, синхронизированных из Events Provider API."""
     __tablename__ = "events"
 
     id: Mapped[uuid.UUID] = mapped_column(

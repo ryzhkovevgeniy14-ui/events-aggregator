@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Настройки приложения, загружаемые из переменных окружения."""
     postgres_connection_string: str
     postgres_database_name: str
     postgres_host: str

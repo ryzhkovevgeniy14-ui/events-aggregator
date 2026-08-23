@@ -1,3 +1,5 @@
+"""Конфигурация логирования приложения."""
+
 import logging
 
 logging.basicConfig(

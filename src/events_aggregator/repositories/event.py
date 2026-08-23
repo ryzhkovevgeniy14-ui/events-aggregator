@@ -8,6 +8,10 @@ from events_aggregator.models.event import Event
 
 
 class EventRepository(Protocol):
+    """
+    Интерфейс репозитория для работы с мероприятиями.
+    Определяет операции получения, выборки и сохранения событий.
+    """
     async def get(self, event_id: UUID) -> Event | None:
         ...
 
