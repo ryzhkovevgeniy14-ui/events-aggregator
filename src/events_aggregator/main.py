@@ -9,7 +9,10 @@ from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from events_aggregator.clients.capashino import CapashinoClient
+from events_aggregator.core.config import settings
 from events_aggregator.routers import events, health, sync, tickets
+from events_aggregator.services.outbox_worker import outbox_worker
 from events_aggregator.services.sync_worker import sync_worker
 
 
@@ -20,14 +23,26 @@ async def lifespan(app: FastAPI):
         app.state.http_client = client
         app.state.seats_cache = {}
 
-        worker = asyncio.create_task(sync_worker(client))
+        capashino_client = CapashinoClient(
+            base_url=settings.capashino_base_url,
+            api_key=settings.capashino_api_key,
+            client=client,
+        )
+
+        sync_task = asyncio.create_task(sync_worker(client))
+        outbox_task = asyncio.create_task(
+            outbox_worker(capashino_client),
+        )
 
         try:
             yield
         finally:
-            # Останавливаем фоновую синхронизацию перед завершением приложения
-            worker.cancel()
-            await worker
+            # Останавливаем фоновые задачи перед завершением приложения
+            sync_task.cancel()
+            outbox_task.cancel()
+
+            await sync_task
+            await outbox_task
 
 
 app = FastAPI(
