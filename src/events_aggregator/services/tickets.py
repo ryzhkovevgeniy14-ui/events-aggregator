@@ -7,8 +7,10 @@ import httpx
 
 from events_aggregator.clients.events_provider import EventsProviderClient
 from events_aggregator.core.enums import EventStatus, TicketStatus
+from events_aggregator.models.outbox import Outbox
 from events_aggregator.models.ticket import Ticket
 from events_aggregator.repositories.event import EventRepository
+from events_aggregator.repositories.outbox import OutboxRepository
 from events_aggregator.repositories.ticket import TicketRepository
 from events_aggregator.schemas.ticket import RegisterResponse, UnregisterResponse
 from events_aggregator.services.exceptions import (
@@ -29,10 +31,12 @@ class TicketService:
         self,
         events: EventRepository,
         tickets: TicketRepository,
+        outbox: OutboxRepository,
         client: EventsProviderClient,
     ) -> None:
         self.events = events
         self.tickets = tickets
+        self.outbox = outbox
         self.client = client
 
     async def register(
@@ -46,8 +50,9 @@ class TicketService:
         """
         Регистрирует пользователя на мероприятие.
 
-        Проверяет доступность мероприятия и места, выполняет
-        регистрацию через Events Provider и сохраняет билет в базе данных.
+        Проверяет доступность мероприятия и места,
+        выполняет регистрацию через Events Provider,
+        сохраняет билет и событие Outbox в базе данных
         """
         event = await self.events.get(event_id)
 
@@ -93,6 +98,16 @@ class TicketService:
         )
 
         await self.tickets.create(ticket)
+
+        outbox = Outbox(
+            event_type="ticket_purchased",
+            payload={
+                "ticket_id": str(provider_response.ticket_id),
+                "event_name": event.name,
+            },
+        )
+
+        await self.outbox.create(outbox)
 
         return provider_response
 
