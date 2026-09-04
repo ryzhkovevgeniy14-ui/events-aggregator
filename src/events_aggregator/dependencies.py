@@ -11,6 +11,10 @@ from events_aggregator.repositories.event import EventRepository
 from events_aggregator.repositories.event_sqlalchemy import (
     SqlAlchemyEventRepository,
 )
+from events_aggregator.repositories.outbox import OutboxRepository
+from events_aggregator.repositories.outbox_sqlalchemy import (
+    SqlAlchemyOutboxRepository,
+)
 from events_aggregator.repositories.place_sqlalchemy import (
     SqlAlchemyPlaceRepository,
 )
@@ -88,9 +92,11 @@ async def get_ticket_service(
 ) -> TicketService:
     """Создаёт сервис регистрации и отмены регистрации на события."""
     tickets: TicketRepository = SqlAlchemyTicketRepository(db)
+    outbox: OutboxRepository = SqlAlchemyOutboxRepository(db)
 
     return TicketService(
         events=events,
         tickets=tickets,
+        outbox=outbox,
         client=client,
     )
