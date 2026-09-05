@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     postgres_password: str
     events_provider_base_url: str
     events_provider_api_key: str
+    capashino_base_url: str
+    capashino_api_key: str
 
     model_config = SettingsConfigDict(
         extra="ignore",
