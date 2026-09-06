@@ -12,6 +12,7 @@ from events_aggregator.services.exceptions import (
     EventAlreadyPassedError,
     EventNotFoundError,
     EventNotPublishedError,
+    IdempotencyConflictError,
     RegistrationDeadlinePassedError,
     SeatNotAvailableError,
     TicketNotFoundError,
@@ -36,6 +37,7 @@ async def register_ticket(
             last_name=data.last_name,
             email=data.email,
             seat=data.seat,
+            idempotency_key=data.idempotency_key,
         )
     except EventNotFoundError as exc:
         raise HTTPException(
@@ -55,6 +57,11 @@ async def register_ticket(
     except SeatNotAvailableError as exc:
         raise HTTPException(
             status_code=400,
+            detail=str(exc),
+        ) from exc
+    except IdempotencyConflictError as exc:
+        raise HTTPException(
+            status_code=409,
             detail=str(exc),
         ) from exc
 
