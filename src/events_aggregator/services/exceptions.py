@@ -27,3 +27,7 @@ class TicketNotFoundError(ValueError):
 
 class EventAlreadyPassedError(ValueError):
     pass
+
+
+class IdempotencyConflictError(ValueError):
+    pass
