@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
@@ -15,6 +17,7 @@ class RegisterRequest(BaseModel):
     last_name: str
     email: EmailStr
     seat: str
+    idempotency_key: str | None = None
 
 
 class RegisterResponse(BaseModel):
