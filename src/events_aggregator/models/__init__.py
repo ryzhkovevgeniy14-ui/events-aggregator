@@ -3,6 +3,7 @@ from events_aggregator.models.outbox import Outbox
 from events_aggregator.models.place import Place
 from events_aggregator.models.sync_state import SyncState
 from events_aggregator.models.ticket import Ticket
+from events_aggregator.models.ticket_idempotency import TicketIdempotency
 
 __all__ = [
     "Event",
@@ -10,4 +11,5 @@ __all__ = [
     "Place",
     "SyncState",
     "Ticket",
+    "TicketIdempotency",
 ]
