@@ -22,6 +22,12 @@ from events_aggregator.repositories.sync_state_sqlalchemy import (
     SqlAlchemySyncStateRepository,
 )
 from events_aggregator.repositories.ticket import TicketRepository
+from events_aggregator.repositories.ticket_idempotency import (
+    TicketIdempotencyRepository,
+)
+from events_aggregator.repositories.ticket_idempotency_sqlalchemy import (
+    SqlAlchemyTicketIdempotencyRepository,
+)
 from events_aggregator.repositories.ticket_sqlalchemy import (
     SqlAlchemyTicketRepository,
 )
@@ -93,10 +99,14 @@ async def get_ticket_service(
     """Создаёт сервис регистрации и отмены регистрации на события."""
     tickets: TicketRepository = SqlAlchemyTicketRepository(db)
     outbox: OutboxRepository = SqlAlchemyOutboxRepository(db)
+    idempotency: TicketIdempotencyRepository = (
+        SqlAlchemyTicketIdempotencyRepository(db)
+    )
 
     return TicketService(
         events=events,
         tickets=tickets,
         outbox=outbox,
+        idempotency=idempotency,
         client=client,
     )
