@@ -4,16 +4,23 @@ import asyncio
 from contextlib import asynccontextmanager
 
 import httpx
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from events_aggregator.clients.capashino import CapashinoClient
 from events_aggregator.core.config import settings
 from events_aggregator.routers import events, health, sync, tickets
 from events_aggregator.services.outbox_worker import outbox_worker
 from events_aggregator.services.sync_worker import sync_worker
+
+sentry_sdk.init(
+    dsn=settings.glitchtip_dsn,
+    integrations=[FastApiIntegration()],
+)
 
 
 @asynccontextmanager
@@ -64,6 +71,12 @@ async def validation_exception_handler(
         )
 
     return await request_validation_exception_handler(request, exc)
+
+
+@app.get("/api/test-error")
+async def test_error():
+    """Тестовый эндпоинт для проверки отправки исключений в GlitchTip."""
+    raise RuntimeError("GlitchTip integration test")
 
 
 app.include_router(health.router)
