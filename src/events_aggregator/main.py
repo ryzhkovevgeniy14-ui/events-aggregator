@@ -73,12 +73,6 @@ async def validation_exception_handler(
     return await request_validation_exception_handler(request, exc)
 
 
-@app.get("/api/test-error")
-async def test_error():
-    """Тестовый эндпоинт для проверки отправки исключений в GlitchTip."""
-    raise RuntimeError("GlitchTip integration test")
-
-
 app.include_router(health.router)
 app.include_router(sync.router)
 app.include_router(events.router)
