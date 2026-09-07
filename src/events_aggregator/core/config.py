@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     events_provider_api_key: str
     capashino_base_url: str
     capashino_api_key: str
+    glitchtip_dsn: str
 
     model_config = SettingsConfigDict(
         extra="ignore",
