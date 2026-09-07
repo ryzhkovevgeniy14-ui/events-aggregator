@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     capashino_api_key: str
     glitchtip_dsn: str
 
+    outbox_interval: int = 5
+    outbox_batch_size: int = 100
+    idempotency_retention_days: int = 30
+
     model_config = SettingsConfigDict(
         extra="ignore",
     )

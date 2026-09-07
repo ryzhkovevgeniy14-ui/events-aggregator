@@ -3,15 +3,13 @@ from __future__ import annotations
 import asyncio
 
 from events_aggregator.clients.capashino import CapashinoClient
+from events_aggregator.core.config import settings
 from events_aggregator.core.enums import OutboxStatus
 from events_aggregator.core.logging import logger
 from events_aggregator.db.session import async_session_maker
 from events_aggregator.repositories.outbox_sqlalchemy import (
     SqlAlchemyOutboxRepository,
 )
-
-OUTBOX_INTERVAL = 5
-OUTBOX_BATCH_SIZE = 100
 
 
 async def outbox_worker(
@@ -23,7 +21,7 @@ async def outbox_worker(
             repository = SqlAlchemyOutboxRepository(session)
 
             outbox_events = await repository.get_pending(
-                limit=OUTBOX_BATCH_SIZE,
+                limit=settings.outbox_batch_size,
             )
 
             await session.commit()
@@ -49,4 +47,4 @@ async def outbox_worker(
                 outbox.status = OutboxStatus.SENT
                 await session.commit()
 
-        await asyncio.sleep(OUTBOX_INTERVAL)
+        await asyncio.sleep(settings.outbox_interval)
