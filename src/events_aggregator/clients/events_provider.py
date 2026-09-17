@@ -10,6 +10,7 @@ import httpx
 from events_aggregator.schemas.event import EventsResponse
 from events_aggregator.schemas.seats import ProviderSeatsResponse
 from events_aggregator.schemas.ticket import RegisterResponse, UnregisterResponse
+from events_aggregator.services.exceptions import SeatNotAvailableError
 
 
 class EventsProviderClient:
@@ -118,17 +119,25 @@ class EventsProviderClient:
         Регистрирует участника на мероприятие через Events Provider API.
         Передаёт данные участника и выбранное место.
         """
-        response = await self._request(
-            "POST",
-            urljoin(self.base_url, f"api/events/{event_id}/register/"),
-            headers={"x-api-key": self.api_key},
-            json={
-                "first_name": first_name,
-                "last_name": last_name,
-                "email": email,
-                "seat": seat,
-            },
-        )
+        try:
+            response = await self._request(
+                "POST",
+                urljoin(self.base_url, f"api/events/{event_id}/register/"),
+                headers={"x-api-key": self.api_key},
+                json={
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "email": email,
+                    "seat": seat,
+                },
+            )
+
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 400:
+                raise SeatNotAvailableError(
+                    "Seat is not available",
+                ) from exc
+            raise
 
         return RegisterResponse.model_validate(response.json())
 

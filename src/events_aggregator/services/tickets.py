@@ -3,8 +3,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from uuid import UUID
 
-import httpx
-
 from events_aggregator.clients.events_provider import EventsProviderClient
 from events_aggregator.core.enums import EventStatus, TicketStatus
 from events_aggregator.models.outbox import Outbox
@@ -100,20 +98,13 @@ class TicketService:
         if seat not in seats.seats:
             raise SeatNotAvailableError("Seat is not available")
 
-        try:
-            provider_response = await self.client.register(
-                event_id=event_id,
-                first_name=first_name,
-                last_name=last_name,
-                email=email,
-                seat=seat,
-            )
-        except httpx.HTTPStatusError as exc:
-            if exc.response.status_code == 400:
-                raise SeatNotAvailableError(
-                    "Seat is not available",
-                ) from exc
-            raise
+        provider_response = await self.client.register(
+            event_id=event_id,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            seat=seat,
+        )
 
         ticket = Ticket(
             ticket_id=provider_response.ticket_id,
