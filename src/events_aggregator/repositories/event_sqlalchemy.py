@@ -59,3 +59,10 @@ class SqlAlchemyEventRepository:
     async def save(self, event: Event) -> None:
         self.session.add(event)
         await self.session.flush()
+
+    async def count(self) -> int:
+        result = await self.session.execute(
+            select(func.count()).select_from(Event),
+        )
+
+        return result.scalar_one()
