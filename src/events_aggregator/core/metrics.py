@@ -1,4 +1,4 @@
-from prometheus_client import Counter, Histogram
+from prometheus_client import Counter, Gauge, Histogram
 
 http_requests_total = Counter(
     "http_requests_total",
@@ -23,4 +23,19 @@ events_provider_request_duration_seconds = Histogram(
     "events_provider_request_duration_seconds",
     "Events Provider request duration in seconds",
     ["endpoint"],
+)
+
+tickets_created_total = Gauge(
+    "tickets_created_total",
+    "Total number of tickets",
+)
+
+tickets_cancelled_total = Gauge(
+    "tickets_cancelled_total",
+    "Total number of cancelled tickets",
+)
+
+events_total = Gauge(
+    "events_total",
+    "Total number of events",
 )
