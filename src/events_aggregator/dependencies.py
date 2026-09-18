@@ -61,6 +61,13 @@ async def get_event_repository(
     return SqlAlchemyEventRepository(db)
 
 
+async def get_ticket_repository(
+    db: AsyncSession = Depends(get_async_db),  # noqa: B008
+) -> SqlAlchemyTicketRepository:
+    """Создаёт репозиторий регистраций на основе текущей DB-сессии."""
+    return SqlAlchemyTicketRepository(db)
+
+
 async def get_sync_service(
     client: EventsProviderClient = Depends(get_events_provider_client),  # noqa: B008
     db: AsyncSession = Depends(get_async_db),  # noqa: B008
