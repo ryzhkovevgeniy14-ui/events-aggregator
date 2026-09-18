@@ -5,6 +5,7 @@
 возникающих при работе с мероприятиями и регистрациями.
 """
 
+
 class EventNotFoundError(ValueError):
     pass
 

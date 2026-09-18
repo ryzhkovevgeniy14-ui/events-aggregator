@@ -11,11 +11,9 @@ class TicketIdempotencyRepository(Protocol):
     async def get_key(
         self,
         idempotency_key: str,
-    ) -> TicketIdempotency | None:
-        ...
+    ) -> TicketIdempotency | None: ...
 
     async def create(
         self,
         idempotency: TicketIdempotency,
-    ) -> None:
-        ...
+    ) -> None: ...

@@ -68,9 +68,7 @@ async def test_events_next_page(client: EventsProviderClient) -> None:
         url=next_url,
     )
 
-    assert result.previous == (
-        "http://events-provider/api/events/?cursor=previous"
-    )
+    assert result.previous == "http://events-provider/api/events/?cursor=previous"
 
     client.client.request.assert_awaited_once_with(
         "GET",

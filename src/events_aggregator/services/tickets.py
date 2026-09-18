@@ -30,6 +30,7 @@ class TicketService:
     """
     Сервис регистрации и отмены регистрации на мероприятия.
     """
+
     def __init__(
         self,
         events: EventRepository,
@@ -60,7 +61,7 @@ class TicketService:
         выполняет регистрацию через Events Provider,
         сохраняет билет, событие Outbox и результат идемпотентности
         в базе данных.
-    """
+        """
         if idempotency_key is not None:
             idempotency = await self.idempotency.get_key(idempotency_key)
 

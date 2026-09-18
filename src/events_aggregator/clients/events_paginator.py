@@ -16,6 +16,7 @@ class EventsPaginator:
 
     Используется при полной или инкрементальной синхронизации событий.
     """
+
     def __init__(
         self,
         client: EventsProviderClient,

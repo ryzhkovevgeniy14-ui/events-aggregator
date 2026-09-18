@@ -16,6 +16,7 @@ class EventResponse(BaseModel):
     при получении его деталей и синхронизации с Events Provider API.
     Содержит полную информацию о событии и площадке.
     """
+
     id: UUID
     name: str
     place: PlaceResponse
@@ -38,6 +39,7 @@ class EventsResponse(BaseModel):
     во время синхронизации.
     Содержит ссылки на следующие страницы и список событий.
     """
+
     next: str | None
     previous: str | None
     results: list[EventResponse]
@@ -50,6 +52,7 @@ class EventListItem(BaseModel):
     Используется в ответе API при получении списка событий.
     Содержит основные данные события и сокращённую информацию о площадке.
     """
+
     id: UUID
     name: str
     place: PlaceListItem
@@ -68,6 +71,7 @@ class EventsListResponse(BaseModel):
     Используется для возврата списка синхронизированных событий клиенту.
     Содержит количество событий, ссылки пагинации и список результатов.
     """
+
     count: int
     next: str | None
     previous: str | None

@@ -12,6 +12,7 @@ class RegisterRequest(BaseModel):
     Используется для регистрации на мероприятие.
     Содержит данные участника, идентификатор события и выбранное место.
     """
+
     event_id: UUID
     first_name: str
     last_name: str
@@ -26,6 +27,7 @@ class RegisterResponse(BaseModel):
 
     Используется для возврата идентификатора созданного билета.
     """
+
     ticket_id: UUID
 
 
@@ -35,4 +37,5 @@ class UnregisterResponse(BaseModel):
 
     Содержит признак успешного выполнения операции.
     """
+
     success: bool

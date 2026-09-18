@@ -108,10 +108,7 @@ async def test_paginator_multiple_pages(
         "Конференция по PostgreSQL",
     )
 
-    next_url = (
-        "http://events-provider/api/events/"
-        "?changed_at=2000-01-01&cursor=next"
-    )
+    next_url = "http://events-provider/api/events/?changed_at=2000-01-01&cursor=next"
 
     client.events.side_effect = [
         EventsResponse(

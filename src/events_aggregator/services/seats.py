@@ -21,6 +21,7 @@ class SeatsService:
     кэширование списка мест на 30 секунд и при необходимости
     запрашивает актуальные данные у Events Provider API.
     """
+
     def __init__(
         self,
         events: EventRepository,
@@ -52,10 +53,7 @@ class SeatsService:
         if cached is not None:
             cached_at, seats = cached
 
-            if (
-                datetime.now(timezone.utc) - cached_at
-                < timedelta(seconds=30)
-            ):
+            if datetime.now(timezone.utc) - cached_at < timedelta(seconds=30):
                 return SeatsResponse(
                     event_id=event_id,
                     available_seats=seats,

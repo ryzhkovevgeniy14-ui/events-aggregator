@@ -40,9 +40,7 @@ async def list_events(
     ссылки на следующую и предыдущую страницы.
     """
     date_from_datetime = (
-        datetime.combine(date_from, time.min)
-        if date_from is not None
-        else None
+        datetime.combine(date_from, time.min) if date_from is not None else None
     )
 
     events_list, count = await events.list(
@@ -51,10 +49,7 @@ async def list_events(
         page_size=page_size,
     )
 
-    results = [
-        EventListItem.model_validate(event)
-        for event in events_list
-    ]
+    results = [EventListItem.model_validate(event) for event in events_list]
 
     next_url = None
     if page * page_size < count:
@@ -66,9 +61,7 @@ async def list_events(
         if date_from is not None:
             next_params["date_from"] = date_from.isoformat()
 
-        next_url = str(
-            request.url.replace_query_params(**next_params)
-        )
+        next_url = str(request.url.replace_query_params(**next_params))
 
     previous_url = None
     if page > 1:
@@ -80,9 +73,7 @@ async def list_events(
         if date_from is not None:
             previous_params["date_from"] = date_from.isoformat()
 
-        previous_url = str(
-            request.url.replace_query_params(**previous_params)
-        )
+        previous_url = str(request.url.replace_query_params(**previous_params))
 
     return EventsListResponse(
         count=count,

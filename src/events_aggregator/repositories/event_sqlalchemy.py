@@ -15,6 +15,7 @@ class SqlAlchemyEventRepository:
     SQLAlchemy-реализация репозитория для работы с мероприятиями.
     Выполняет операции с таблицей событий через AsyncSession.
     """
+
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
@@ -43,11 +44,7 @@ class SqlAlchemyEventRepository:
         )
         total = total_result.scalar_one()
 
-        query = (
-            query
-            .options(selectinload(Event.place))
-            .order_by(Event.event_time)
-        )
+        query = query.options(selectinload(Event.place)).order_by(Event.event_time)
 
         offset = (page - 1) * page_size
 

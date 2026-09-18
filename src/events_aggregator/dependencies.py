@@ -99,9 +99,7 @@ async def get_ticket_service(
     """Создаёт сервис регистрации и отмены регистрации на события."""
     tickets: TicketRepository = SqlAlchemyTicketRepository(db)
     outbox: OutboxRepository = SqlAlchemyOutboxRepository(db)
-    idempotency: TicketIdempotencyRepository = (
-        SqlAlchemyTicketIdempotencyRepository(db)
-    )
+    idempotency: TicketIdempotencyRepository = SqlAlchemyTicketIdempotencyRepository(db)
 
     return TicketService(
         events=events,

@@ -12,16 +12,14 @@ class EventRepository(Protocol):
     Интерфейс репозитория для работы с мероприятиями.
     Определяет операции получения, выборки и сохранения событий.
     """
-    async def get(self, event_id: UUID) -> Event | None:
-        ...
+
+    async def get(self, event_id: UUID) -> Event | None: ...
 
     async def list(
         self,
         date_from: datetime | None,
         page: int,
         page_size: int,
-    ) -> tuple[list[Event], int]:
-        ...
+    ) -> tuple[list[Event], int]: ...
 
-    async def save(self, event: Event) -> None:
-        ...
+    async def save(self, event: Event) -> None: ...

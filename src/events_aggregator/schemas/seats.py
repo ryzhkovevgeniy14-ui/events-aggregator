@@ -10,6 +10,7 @@ class ProviderSeatsResponse(BaseModel):
     Используется при получении актуального списка свободных мест.
     Содержит список доступных мест.
     """
+
     seats: list[str]
 
 
@@ -20,5 +21,6 @@ class SeatsResponse(BaseModel):
     Используется для возврата актуального списка доступных мест клиенту.
     Содержит идентификатор события и список свободных мест.
     """
+
     event_id: UUID
     available_seats: list[str]

@@ -13,6 +13,7 @@ class SqlAlchemySyncStateRepository:
     Выполняет операции с таблицей состояния синхронизации
     через AsyncSession.
     """
+
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 

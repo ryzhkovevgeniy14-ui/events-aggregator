@@ -8,6 +8,7 @@ from events_aggregator.db.base import Base
 
 class TicketIdempotency(Base):
     """ORM-модель для хранения результатов идемпотентных регистраций."""
+
     __tablename__ = "ticket_idempotency"
 
     id: Mapped[uuid.UUID] = mapped_column(

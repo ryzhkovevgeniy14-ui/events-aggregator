@@ -23,6 +23,7 @@ class SyncService:
     Выполняет первичную или инкрементальную синхронизацию данных,
     обновляет состояние синхронизации и сохраняет результат выполнения.
     """
+
     def __init__(
         self,
         client: EventsProviderClient,
@@ -90,10 +91,7 @@ class SyncService:
 
                 synced_events += 1
 
-                if (
-                    max_changed_at is None
-                    or provider_event.changed_at > max_changed_at
-                ):
+                if max_changed_at is None or provider_event.changed_at > max_changed_at:
                     max_changed_at = provider_event.changed_at
 
             state.last_sync_time = datetime.now(timezone.utc)
@@ -103,8 +101,7 @@ class SyncService:
             await self.sync_state.save(state)
 
             logger.info(
-                "Synchronization completed successfully. "
-                "Events processed: %d",
+                "Synchronization completed successfully. Events processed: %d",
                 synced_events,
             )
 
@@ -119,10 +116,7 @@ class SyncService:
 
             raise
 
-    async def _sync_place(
-        self,
-        provider_place: PlaceResponse
-    ) -> Place:
+    async def _sync_place(self, provider_place: PlaceResponse) -> Place:
         """
         Создаёт или обновляет площадку на основе данных Events Provider.
         """

@@ -11,6 +11,7 @@ class PlaceResponse(BaseModel):
     Используется при получении деталей события.
     Содержит данные площадки, включая схему рассадки.
     """
+
     id: UUID
     name: str
     city: str
@@ -29,6 +30,7 @@ class PlaceListItem(BaseModel):
     Используется при получении списка событий.
     Содержит основные данные площадки без схемы рассадки.
     """
+
     id: UUID
     name: str
     city: str
