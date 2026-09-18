@@ -16,15 +16,18 @@ class MetricsMiddleware(BaseHTTPMiddleware):
 
         duration = time.monotonic() - start_time
 
+        route = request.scope.get("route")
+        endpoint = route.path if route else request.url.path
+
         http_requests_total.labels(
             method=request.method,
-            endpoint=request.url.path,
+            endpoint=endpoint,
             status=response.status_code,
         ).inc()
 
         http_request_duration_seconds.labels(
             method=request.method,
-            endpoint=request.url.path,
+            endpoint=endpoint,
         ).observe(duration)
 
         return response
