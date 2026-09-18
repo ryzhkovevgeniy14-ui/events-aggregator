@@ -5,6 +5,7 @@ from uuid import UUID
 
 from events_aggregator.clients.events_provider import EventsProviderClient
 from events_aggregator.core.enums import EventStatus
+from events_aggregator.core.metrics import cache_hits_total, cache_misses_total
 from events_aggregator.repositories.event import EventRepository
 from events_aggregator.schemas.seats import SeatsResponse
 from events_aggregator.services.exceptions import (
@@ -54,10 +55,14 @@ class SeatsService:
             cached_at, seats = cached
 
             if datetime.now(timezone.utc) - cached_at < timedelta(seconds=30):
+                cache_hits_total.inc()
+
                 return SeatsResponse(
                     event_id=event_id,
                     available_seats=seats,
                 )
+
+        cache_misses_total.inc()
 
         provider_response = await self.client.seats(event_id)
 
