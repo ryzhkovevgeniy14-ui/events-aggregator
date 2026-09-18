@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from datetime import date
 from urllib.parse import urljoin
 from uuid import UUID
 
 import httpx
 
+from events_aggregator.core.metrics import (
+    events_provider_request_duration_seconds,
+    events_provider_requests_total,
+)
 from events_aggregator.schemas.event import EventsResponse
 from events_aggregator.schemas.seats import ProviderSeatsResponse
 from events_aggregator.schemas.ticket import RegisterResponse, UnregisterResponse
@@ -39,6 +44,7 @@ class EventsProviderClient:
         self,
         method: str,
         url: str,
+        endpoint: str,
         **kwargs: object,
     ) -> httpx.Response:
         """
@@ -49,11 +55,25 @@ class EventsProviderClient:
         """
         for attempt in range(self.MAX_ATTEMPTS):
             try:
+                start_time = time.monotonic()
+
                 response = await self.client.request(
                     method,
                     url,
                     **kwargs,
                 )
+
+                duration = time.monotonic() - start_time
+
+                events_provider_requests_total.labels(
+                    endpoint=endpoint,
+                    status=response.status_code,
+                ).inc()
+
+                events_provider_request_duration_seconds.labels(
+                    endpoint=endpoint,
+                ).observe(duration)
+
                 response.raise_for_status()
                 return response
 
@@ -83,6 +103,7 @@ class EventsProviderClient:
             response = await self._request(
                 "GET",
                 url,
+                endpoint="/events",
                 params={"changed_at": changed_at.isoformat()},
                 headers={"x-api-key": self.api_key},
             )
@@ -90,6 +111,7 @@ class EventsProviderClient:
             response = await self._request(
                 "GET",
                 url,
+                endpoint="/events",
                 headers={"x-api-key": self.api_key},
             )
 
@@ -103,6 +125,7 @@ class EventsProviderClient:
         response = await self._request(
             "GET",
             urljoin(self.base_url, f"api/events/{event_id}/seats/"),
+            endpoint="/seats",
             headers={"x-api-key": self.api_key},
         )
 
@@ -124,6 +147,7 @@ class EventsProviderClient:
             response = await self._request(
                 "POST",
                 urljoin(self.base_url, f"api/events/{event_id}/register/"),
+                endpoint="/registration",
                 headers={"x-api-key": self.api_key},
                 json={
                     "first_name": first_name,
@@ -154,6 +178,7 @@ class EventsProviderClient:
         response = await self._request(
             "DELETE",
             urljoin(self.base_url, f"api/events/{event_id}/unregister/"),
+            endpoint="/registration",
             headers={"x-api-key": self.api_key},
             json={"ticket_id": str(ticket_id)},
         )
