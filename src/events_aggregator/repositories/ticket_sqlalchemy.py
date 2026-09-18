@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from events_aggregator.core.enums import TicketStatus
 from events_aggregator.models.ticket import Ticket
 
 
@@ -27,3 +28,19 @@ class SqlAlchemyTicketRepository:
     async def create(self, ticket: Ticket) -> None:
         self.session.add(ticket)
         await self.session.flush()
+
+    async def count(self) -> int:
+        result = await self.session.execute(
+            select(func.count()).select_from(Ticket),
+        )
+
+        return result.scalar_one()
+
+    async def count_cancelled(self) -> int:
+        result = await self.session.execute(
+            select(func.count())
+            .select_from(Ticket)
+            .where(Ticket.status == TicketStatus.CANCELLED),
+        )
+
+        return result.scalar_one()
