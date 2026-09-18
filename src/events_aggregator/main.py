@@ -13,6 +13,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from events_aggregator.clients.capashino import CapashinoClient
 from events_aggregator.core.config import settings
+from events_aggregator.core.metrics_middleware import MetricsMiddleware
 from events_aggregator.routers import events, health, metrics, sync, tickets
 from events_aggregator.services.outbox_worker import outbox_worker
 from events_aggregator.services.sync_worker import sync_worker
@@ -56,6 +57,8 @@ app = FastAPI(
     title="Events Aggregator",
     lifespan=lifespan,
 )
+
+app.add_middleware(MetricsMiddleware)
 
 
 @app.exception_handler(RequestValidationError)
