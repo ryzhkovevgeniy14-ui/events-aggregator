@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  lint:
+  ruff:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,11 +27,52 @@ jobs:
       - name: Run Ruff
         run: uv run ruff check .
 
+  ruff-format:
+    needs: ruff
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.5"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Check Ruff format
+        run: uv run ruff format --check .
+
+  tests:
+    needs: ruff-format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.5"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --locked
+
       - name: Run tests
         run: uv run pytest
 
   build:
-    needs: lint
+    needs: tests
     runs-on: ubuntu-latest
 
     outputs:
