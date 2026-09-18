@@ -13,7 +13,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from events_aggregator.clients.capashino import CapashinoClient
 from events_aggregator.core.config import settings
-from events_aggregator.routers import events, health, sync, tickets
+from events_aggregator.routers import events, health, metrics, sync, tickets
 from events_aggregator.services.outbox_worker import outbox_worker
 from events_aggregator.services.sync_worker import sync_worker
 
@@ -77,3 +77,4 @@ app.include_router(health.router)
 app.include_router(sync.router)
 app.include_router(events.router)
 app.include_router(tickets.router)
+app.include_router(metrics.router)

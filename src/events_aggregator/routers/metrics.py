@@ -1,6 +1,6 @@
-from prometheus_client import REGISTRY, generate_latest
 from fastapi import APIRouter
 from fastapi.responses import Response
+from prometheus_client import REGISTRY, generate_latest
 
 router = APIRouter()
 
