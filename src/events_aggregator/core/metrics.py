@@ -39,3 +39,13 @@ events_total = Gauge(
     "events_total",
     "Total number of events",
 )
+
+cache_hits_total = Counter(
+    "cache_hits_total",
+    "Total number of cache hits",
+)
+
+cache_misses_total = Counter(
+    "cache_misses_total",
+    "Total number of cache misses",
+)
